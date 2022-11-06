@@ -6,6 +6,7 @@ import net.jqwik.api.constraints.NotBlank;
 import net.jqwik.api.constraints.Size;
 import net.jqwik.api.constraints.UniqueElements;
 import net.jqwik.web.api.Email;
+import net.jqwik.web.api.Web;
 import org.assertj.core.api.Assertions;
 
 import java.util.Collection;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 public class ProjectManagementTests
 {
     @Property(tries = 1000)
-//    @Disabled
+    @Disabled
     void test(
             @ForAll /*@AlphaChars*/ @NotBlank String projectName,
             @ForAll @Size(max = 10) @UniqueElements List<@NotBlank @Email String> email
@@ -27,6 +28,19 @@ public class ProjectManagementTests
         Project project = new Project(projectName);
         List<User> users  = email.stream().map(User::new).collect(Collectors.toList());
         users.forEach(project::addMember);
+    }
+    @Property ( tries = 100 )
+    void you_can_add_up_to_10_team_members(
+        @ForAll @NotBlank String projectName,
+                @ForAll("members") @Size(max=10) List<User> users )
+    {
+        Project project = new Project(projectName);
+        users.forEach( project::addMember );
+        users.forEach( (u) -> Assertions.assertThat(project.isMember(u)).isTrue() );
+    }
+    @Property
+    Arbitrary<List<User>> members() {
+        return Web.emails().map(User::new).list().uniqueElements();
     }
 
     @Property(tries = 3)

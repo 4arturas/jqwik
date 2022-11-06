@@ -2,6 +2,8 @@ package org.example;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Project
@@ -28,6 +30,13 @@ public class Project
             throw new RuntimeException("Member with email " + member.email + " already exists");
 
         this.members.add(member);
+    }
+
+    public boolean isMember( User user )
+    {
+        List<User> users = members.stream().filter( (u) -> u.email.equals(user.email) ).collect(Collectors.toList());
+        assert users.size() > 0;
+        return users.size() > 0;
     }
 
 }
